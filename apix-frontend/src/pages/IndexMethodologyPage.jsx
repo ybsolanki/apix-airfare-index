@@ -11,7 +11,7 @@ export default function IndexMethodologyPage() {
     async function load() {
       try {
         const [h, c] = await Promise.all([fetchIndexHistory('30D'), fetchIndexCurrent()]);
-        setHistory(h);
+        setHistory(h || []);
         setCurrentIndex(c);
       } catch (err) {
         console.error("Failed to load index methodology data", err);
@@ -41,7 +41,7 @@ export default function IndexMethodologyPage() {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={history} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-              <XAxis dataKey="date" tickLine={false} tick={{ fontSize: 11, fill: '#64748B' }} tickFormatter={(v) => v.slice(5)} />
+              <XAxis dataKey="date" tickLine={false} tick={{ fontSize: 11, fill: '#64748B' }} tickFormatter={(v) => v ? String(v).slice(5) : ''} />
               <YAxis domain={['dataMin - 2', 'dataMax + 2']} tickLine={false} tick={{ fontSize: 11, fill: '#64748B' }} />
               <Tooltip />
               <Legend wrapperStyle={{ fontSize: '12px' }} />
@@ -70,10 +70,10 @@ export default function IndexMethodologyPage() {
           <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
             <div className="font-bold text-slate-900 flex items-center gap-2">
               <span className="w-5 h-5 bg-sky-600 text-white rounded-full flex items-center justify-center text-[10px]">1</span>
-              <span>Base Period & Normalization ($t_0 = 100.0$)</span>
+              <span>Base Period & Normalization (t₀ = 100.0)</span>
             </div>
             <p className="text-slate-600 leading-relaxed">
-              Base period fares ($P_{r,0}$) are fixed at the January 2026 baseline. Individual observation fares are normalized for economy cabin class, 15kg baggage allowance, and currency (INR).
+              Base period fares (P<sub>r,0</sub>) are fixed at the January 2026 baseline. Individual observation fares are normalized for economy cabin class, 15kg baggage allowance, and currency (INR).
             </p>
           </div>
 
@@ -81,13 +81,13 @@ export default function IndexMethodologyPage() {
           <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
             <div className="font-bold text-slate-900 flex items-center gap-2">
               <span className="w-5 h-5 bg-sky-600 text-white rounded-full flex items-center justify-center text-[10px]">2</span>
-              <span>Route-Level Price Relatives ($I_{r,t}$)</span>
+              <span>Route-Level Price Relatives (I<sub>r,t</sub>)</span>
             </div>
             <p className="text-slate-600 leading-relaxed">
-              For each route $r$ on date $t$, the route price index is the ratio of current average normalized fare $P_{r,t}$ to base fare $P_{r,0}$:
+              For each route <em>r</em> on date <em>t</em>, the route price index is the ratio of current average normalized fare P<sub>r,t</sub> to base fare P<sub>r,0</sub>:
             </p>
             <div className="bg-white p-2 rounded border border-slate-200 text-center font-mono font-bold text-sky-800">
-              I_{"{r,t}"} = ( P_{"{r,t}"} / P_{"{r,0}"} ) × 100
+              I<sub>r,t</sub> = ( P<sub>r,t</sub> / P<sub>r,0</sub> ) × 100
             </div>
           </div>
 
@@ -98,10 +98,10 @@ export default function IndexMethodologyPage() {
               <span>Weighted Laspeyres Aggregation</span>
             </div>
             <p className="text-slate-600 leading-relaxed">
-              Route indices are aggregated into the national Airfare Price Index ($I_{total,t}$) using fixed annual seat capacity weights ($w_r$):
+              Route indices are aggregated into the national Airfare Price Index (I<sub>total,t</sub>) using fixed annual seat capacity weights (w<sub>r</sub>):
             </p>
             <div className="bg-white p-2 rounded border border-slate-200 text-center font-mono font-bold text-sky-800">
-              I_{"{total,t}"} = ∑ ( w_r × I_{"{r,t}"} )  [∑ w_r = 1.0]
+              I<sub>total,t</sub> = ∑ ( w<sub>r</sub> × I<sub>r,t</sub> ) &nbsp;&nbsp; [∑ w<sub>r</sub> = 1.0]
             </div>
           </div>
 
@@ -112,7 +112,7 @@ export default function IndexMethodologyPage() {
               <span>Advance Purchase Window Standardizing</span>
             </div>
             <p className="text-slate-600 leading-relaxed">
-              Fares are collected across 6 advance booking horizons ($T+1, T+3, T+7, T+15, T+30, T+45$) to isolate pure price inflation from dynamic yield management.
+              Fares are collected across 6 advance booking horizons (T+1, T+3, T+7, T+15, T+30, T+45) to isolate pure price inflation from dynamic yield management.
             </p>
           </div>
         </div>

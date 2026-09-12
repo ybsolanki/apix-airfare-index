@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>APIx Technical Approach Document — SIH 2026 (PS 26056)</title>
+  <style>
+    @media print {
+      body { margin: 0; padding: 20px; font-size: 11pt; }
+      .no-print { display: none; }
+      .page-break { page-break-before: always; }
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #0f172a;
+      line-height: 1.6;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      background: #ffffff;
+    }
+    .header-banner {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 24px 32px;
+      border-radius: 8px;
+      margin-bottom: 32px;
+    }
+    .header-banner h1 { margin: 0 0 8px 0; font-size: 24px; color: #38bdf8; }
+    .header-banner p { margin: 0; font-size: 14px; color: #94a3b8; }
+    .badge {
+      display: inline-block;
+      background: #0284c7;
+      color: #ffffff;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    h2 { color: #0284c7; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; margin-top: 32px; font-size: 18px; }
+    h3 { color: #0f172a; margin-top: 20px; font-size: 15px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 13px;
+    }
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th { background: #f8fafc; color: #1e293b; font-weight: bold; }
+    tr:nth-child(even) { background: #f8fafc; }
+    .formula-box {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      color: #0369a1;
+      padding: 14px;
+      border-radius: 6px;
+      font-family: "Courier New", monospace;
+      font-weight: bold;
+      text-align: center;
+      margin: 16px 0;
+    }
+    .print-btn {
+      background: #0284c7;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+    .print-btn:hover { background: #0369a1; }
+  </style>
+</head>
+<body>
+
+  <button class="print-btn no-print" onclick="window.print()">🖨️ Print / Save as PDF</button>
+
+  <div class="header-banner">
+    <span class="badge">SIH 2026 • PS 26056</span>
+    <h1>Real-time Airfare Price Index (APIx)</h1>
+    <p>Official Technical Approach & Methodology Specification</p>
+  </div>
+
+  <h2>1. Executive Summary & Problem Context</h2>
+  <p>Traditional Consumer Price Index (CPI) calculations rely on static monthly manual surveys. In modern aviation, dynamic pricing algorithms adjust airfares multiple times daily based on demand, booking windows, and fuel prices. <strong>APIx</strong> solves this gap by establishing an automated, high-frequency Airfare Price Index engine for MoSPI and RBI.</p>
+
+  <h2>2. Technical Architecture Overview</h2>
+  <ul>
+    <li><strong>Ingestion Layer:</strong> Scraper adapters extracting airfares from airline APIs and OTAs adhering to ethical rate limits.</li>
+    <li><strong>Data Cleaner & Normalizer:</strong> IQR outlier filtering (&lt; ₹1,000 or &gt; ₹60,000) and economy baggage standardizing.</li>
+    <li><strong>Index Calculation Engine:</strong> Real-time weighted Laspeyres index relative to base period $t_0 = 100.0$.</li>
+    <li><strong>REST API & Dashboard:</strong> Python FastAPI backend serving an interactive React analytics dashboard.</li>
+  </ul>
+
+  <h2>3. Mathematical Index Calculation Formula</h2>
+  <div class="formula-box">
+    Route Index: I_{r,t} = ( P_{r,t} / P_{r,0} ) × 100
+  </div>
+  <div class="formula-box">
+    National Index: I_{total,t} = ∑ ( w_r × I_{r,t} )  [where ∑ w_r = 1.0]
+  </div>
+
+  <h2>4. Domestic Indian Route Coverage (24 Routes)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Route Corridor</th>
+        <th>Category</th>
+        <th>Distance</th>
+        <th>Base Fare (₹)</th>
+        <th>Capacity Weight ($w_r$)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Delhi → Mumbai (DEL-BOM)</strong></td><td>Metro</td><td>1,148 km</td><td>₹5,400</td><td>0.095</td></tr>
+      <tr><td><strong>Mumbai → Delhi (BOM-DEL)</strong></td><td>Metro</td><td>1,148 km</td><td>₹5,450</td><td>0.095</td></tr>
+      <tr><td><strong>Delhi → Bengaluru (DEL-BLR)</strong></td><td>Metro</td><td>1,740 km</td><td>₹6,200</td><td>0.080</td></tr>
+      <tr><td><strong>Bengaluru → Delhi (BLR-DEL)</strong></td><td>Metro</td><td>1,740 km</td><td>₹6,250</td><td>0.080</td></tr>
+      <tr><td><strong>Mumbai → Bengaluru (BOM-BLR)</strong></td><td>Metro</td><td>842 km</td><td>₹4,300</td><td>0.065</td></tr>
+      <tr><td><strong>Bengaluru → Mumbai (BLR-BOM)</strong></td><td>Metro</td><td>842 km</td><td>₹4,350</td><td>0.065</td></tr>
+      <tr><td><strong>Delhi → Kolkata (DEL-CCU)</strong></td><td>Metro</td><td>1,305 km</td><td>₹5,600</td><td>0.055</td></tr>
+      <tr><td><strong>Kolkata → Delhi (CCU-DEL)</strong></td><td>Metro</td><td>1,305 km</td><td>₹5,650</td><td>0.055</td></tr>
+      <tr><td><strong>Mumbai → Ahmedabad (BOM-AMD)</strong></td><td>Tier-2</td><td>441 km</td><td>₹3,200</td><td>0.040</td></tr>
+      <tr><td><strong>Delhi → Hyderabad (DEL-HYD)</strong></td><td>Metro</td><td>1,253 km</td><td>₹5,100</td><td>0.050</td></tr>
+    </tbody>
+  </table>
+
+  <h2>5. GitHub Repository & Live Demonstration Links</h2>
+  <ul>
+    <li><strong>GitHub Repository:</strong> <a href="https://github.com/ybsolanki/apix-airfare-index">https://github.com/ybsolanki/apix-airfare-index</a></li>
+    <li><strong>Live Interactive Web Platform:</strong> <a href="https://ybsolanki.github.io/apix-airfare-index/">https://ybsolanki.github.io/apix-airfare-index/</a></li>
+  </ul>
+
+</body>
+</html>
